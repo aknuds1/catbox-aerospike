@@ -1,48 +1,52 @@
+'use strict';
+
 // Load Modules
-var Code = require('code');
-var Lab = require('lab');
-var Catbox = require('catbox');
-var Aerospike = require('..');
-var Log = require('aerospike').log;
+const Code = require('code');
+const Lab = require('lab');
+const Catbox = require('catbox');
+const Aerospike = require('..');
+const Log = require('aerospike').log;
 
 // Internals
-var internals = {};
+const internals = {};
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var expect = Code.expect;
-var describe = lab.describe;
-var it = lab.test;
+const lab = exports.lab = Lab.script();
+const expect = Code.expect;
+const describe = lab.describe;
+const it = lab.test;
 
-describe('Aerospike', function(){
+describe('Client', () => {
 
-    it('throws an error if not created with new', function(done){
+    it('throws an error if not created with new', (done) => {
 
-        var fn = function(){
+        const fn = () => {
 
-            var aerospike = Aerospike();
-        }
+            Aerospike();
+        };
 
         expect(fn).to.throw(Error);
         done();
     });
-    
-    it('creates a new connection', function(done){
-        
-        var client = new Catbox.Client(Aerospike);
-        client.start(function(err){
-            
+
+    it('creates a new connection', (done) => {
+
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
+
+            expect(err).to.not.exist();
             expect(client.isReady()).to.equal(true);
             done();
         });
     });
 
-    it('closes the connection', function(done){
-        
-        var client = new Catbox.Client(Aerospike);
-        client.start(function(err){
-            
+    it('closes the connection', (done) => {
+
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
+
+            expect(err).to.not.exist();
             expect(client.isReady()).to.equal(true);
             client.stop();
             expect(client.isReady()).to.equal(false);
@@ -50,16 +54,19 @@ describe('Aerospike', function(){
         });
     });
 
-    it('gets an item after setting it', function(done){
+    it('gets an item after setting it', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function(err){
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
 
-            var key = {namespace: 'test', id: 'x', segment: 'test'};
-            client.set(key, '123', 500, function(err){
+            expect(err).to.not.exist();
+            const key = { namespace: 'test', id: 'x', segment: 'test' };
+            client.set(key, '123', 500, (err) => {
+
                 expect(err).to.not.exist();
-                client.get(key, function(err, result){
-                    expect(err).to.equal(null);
+                client.get(key, (err, result) => {
+
+                    expect(err).to.not.exist();
                     expect(result.item).to.equal('123');
                     done();
                 });
@@ -67,33 +74,35 @@ describe('Aerospike', function(){
         });
     });
 
-    it('fails setting an item with circular references', function(done){
+    it('fails setting an item with circular references', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function(err){
-            
-            var key = {namespace: 'test', id: 'x', segment: 'test'};
-            var value = {a: 1};
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
+
+            expect(err).to.not.exist();
+            const key = { namespace: 'test', id: 'x', segment: 'test' };
+            const value = { a: 1 };
             value.b = value;
-            client.set(key, value, 10, function(err){
-                
+            client.set(key, value, 10, (err) => {
+
                 expect(err.message).to.equal('Converting circular structure to JSON');
                 done();
             });
         });
     });
 
-    it('ignored starting a connection twice on same event', function(done){
+    it('ignored starting a connection twice on same event', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        var x = 2;
-        var start = function(){
-            
-            client.start(function(err){
+        const client = new Catbox.Client(Aerospike);
+        let x = 2;
+        const start = () => {
 
+            client.start((err) => {
+
+                expect(err).to.not.exist();
                 expect(client.isReady()).to.equal(true);
                 --x;
-                if(!x){
+                if (!x){
                     done();
                 }
             });
@@ -103,15 +112,15 @@ describe('Aerospike', function(){
         start();
     });
 
-    it('ignored starting a connection twice chained', function(done){
+    it('ignored starting a connection twice chained', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function(err){
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
 
             expect(err).to.not.exist();
             expect(client.isReady()).to.equal(true);
-            
-            client.start(function(err){
+
+            client.start((err) => {
 
                 expect(err).to.not.exist();
                 expect(client.isReady()).to.equal(true);
@@ -120,12 +129,13 @@ describe('Aerospike', function(){
         });
     });
 
-    it('returns not found on get when using null key', function(done){
-        
-        var client = new Catbox.Client(Aerospike);
-        client.start(function(err){
+    it('returns not found on get when using null key', (done) => {
 
-            client.get(null, function(err, result){
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
+
+            expect(err).to.not.exist();
+            client.get(null, (err, result) => {
 
                 expect(err).to.equal(null);
                 expect(result).to.equal(null);
@@ -134,18 +144,19 @@ describe('Aerospike', function(){
         });
     });
 
-    it('returns not found on get when item expired', function(done){
+    it('returns not found on get when item expired', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function(err){
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
 
-            var key = {id: 'x', namespace: 'test', segment: 'test'};
-            client.set(key, 'x', 1, function(err){
+            expect(err).to.not.exist();
+            const key = { id: 'x', namespace: 'test', segment: 'test' };
+            client.set(key, 'x', 1, (err) => {
 
                 expect(err).to.not.exist();
-                setTimeout(function(){
+                setTimeout(() => {
 
-                    client.get(key, function(err, result){
+                    client.get(key, (err, result) => {
 
                         expect(err).to.equal(null);
                         expect(result).to.equal(null);
@@ -156,25 +167,13 @@ describe('Aerospike', function(){
         });
     });
 
-    it('returns error on set when using null key', function (done) {
+    it('returns error on set when using null key', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function (err) {
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
 
-            client.set(null, {}, 1000, function (err) {
-
-                expect(err instanceof Error).to.equal(true);
-                done();
-            });
-        });
-    });
-
-    it('returns error on get when using invalid key', function (done) {
-
-        var client = new Catbox.Client(Aerospike);
-        client.start(function (err) {
-
-            client.get({}, function (err) {
+            expect(err).to.not.exist();
+            client.set(null, {}, 1000, (err) => {
 
                 expect(err instanceof Error).to.equal(true);
                 done();
@@ -182,25 +181,13 @@ describe('Aerospike', function(){
         });
     });
 
-    it('returns error on drop when using invalid key', function (done) {
+    it('returns error on get when using invalid key', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function (err) {
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
 
-            client.drop({}, function (err) {
-
-                expect(err instanceof Error).to.equal(true);
-                done();
-            });
-        });
-    });
-
-    it('returns error on set when using invalid key', function (done) {
-
-        var client = new Catbox.Client(Aerospike);
-        client.start(function (err) {
-
-            client.set({}, {}, 1000, function (err) {
+            expect(err).to.not.exist();
+            client.get({}, (err) => {
 
                 expect(err instanceof Error).to.equal(true);
                 done();
@@ -208,14 +195,43 @@ describe('Aerospike', function(){
         });
     });
 
+    it('returns error on drop when using invalid key', (done) => {
 
-    it('ignores set when using non-positive ttl value', function (done) {
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function (err) {
+            expect(err).to.not.exist();
+            client.drop({}, (err) => {
 
-            var key = {namespace: 'test', id: 'x', segment: 'test' };
-            client.set(key, 'y', 0, function (err) {
+                expect(err instanceof Error).to.equal(true);
+                done();
+            });
+        });
+    });
+
+    it('returns error on set when using invalid key', (done) => {
+
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
+
+            expect(err).to.not.exist();
+            client.set({}, {}, 1000, (err) => {
+
+                expect(err instanceof Error).to.equal(true);
+                done();
+            });
+        });
+    });
+
+
+    it('ignores set when using non-positive ttl value', (done) => {
+
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
+
+            expect(err).to.not.exist();
+            const key = { namespace: 'test', id: 'x', segment: 'test' };
+            client.set(key, 'y', 0, (err) => {
 
                 expect(err).to.not.exist();
                 done();
@@ -223,12 +239,13 @@ describe('Aerospike', function(){
         });
     });
 
-    it('returns error on drop when using null key', function (done) {
+    it('returns error on drop when using null key', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        client.start(function (err) {
+        const client = new Catbox.Client(Aerospike);
+        client.start((err) => {
 
-            client.drop(null, function (err) {
+            expect(err).to.not.exist();
+            client.drop(null, (err) => {
 
                 expect(err instanceof Error).to.equal(true);
                 done();
@@ -236,12 +253,12 @@ describe('Aerospike', function(){
         });
     });
 
-    it('returns error on get when stopped', function (done) {
+    it('returns error on get when stopped', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
+        const client = new Catbox.Client(Aerospike);
         client.stop();
-        var key = {namespace: 'test', id: 'x', segment: 'test' };
-        client.connection.get(key, function (err, result) {
+        const key = { namespace: 'test', id: 'x', segment: 'test' };
+        client.connection.get(key, (err, result) => {
 
             expect(err).to.exist();
             expect(result).to.not.exist();
@@ -249,92 +266,92 @@ describe('Aerospike', function(){
         });
     });
 
-    it('returns error on non string / object keys', function(done){
+    it('returns error on non string / object keys', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
-        var key = [{namespace: 'test', segment: 'test', id: 'asdf'}];
-        var result = client.connection.generateKey(key);
+        const client = new Catbox.Client(Aerospike);
+        const key = [{ namespace: 'test', segment: 'test', id: 'asdf' }];
+        const result = client.connection.generateKey(key);
         expect(result).to.be.instanceOf(Error);
         done();
     });
 
-    it('returns error on set when stopped', function (done) {
+    it('returns error on set when stopped', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
+        const client = new Catbox.Client(Aerospike);
         client.stop();
-        var key = {namespace: 'test',  id: 'x', segment: 'test' };
-        client.connection.set(key, 'y', 1, function (err) {
+        const key = { namespace: 'test',  id: 'x', segment: 'test' };
+        client.connection.set(key, 'y', 1, (err) => {
 
             expect(err).to.exist();
             done();
         });
     });
 
-    it('returns error on drop when stopped', function (done) {
+    it('returns error on drop when stopped', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
+        const client = new Catbox.Client(Aerospike);
         client.stop();
-        var key = {namespace: 'test', id: 'x', segment: 'test' };
-        client.connection.drop(key, function (err) {
+        const key = { namespace: 'test', id: 'x', segment: 'test' };
+        client.connection.drop(key, (err) => {
 
             expect(err).to.exist();
             done();
         });
     });
 
-    it('returns error on missing segment name', function (done) {
+    it('returns error on missing segment name', (done) => {
 
-        var config = {
+        const config = {
             expiresIn: 50000
         };
-        var fn = function () {
+        const fn = () => {
 
-            var client = new Catbox.Client(Aerospike);
-            var cache = new Catbox.Policy(config, client, '');
+            const client = new Catbox.Client(Aerospike);
+            new Catbox.Policy(config, client, '');
         };
         expect(fn).to.throw(Error);
         done();
     });
 
-    it('returns error on bad segment name', function (done) {
+    it('returns error on bad segment name', (done) => {
 
-        var config = {
+        const config = {
             expiresIn: 50000
         };
-        var fn = function () {
+        const fn = () => {
 
-            var client = new Catbox.Client(Aerospike);
-            var cache = new Catbox.Policy(config, client, 'a\0b');
+            const client = new Catbox.Client(Aerospike);
+            new Catbox.Policy(config, client, 'a\0b');
         };
         expect(fn).to.throw(Error);
         done();
     });
 
-    it('returns error when cache item dropped while stopped', function (done) {
+    it('returns error when cache item dropped while stopped', (done) => {
 
-        var client = new Catbox.Client(Aerospike);
+        const client = new Catbox.Client(Aerospike);
         client.stop();
-        client.drop('a', function (err) {
+        client.drop('a', (err) => {
 
             expect(err).to.exist();
             done();
         });
     });
 
-    describe('#start', function () {
+    describe('#start', () => {
 
-        it('sets client to when the connection succeeds', function (done) {
+        it('sets client to when the connection succeeds', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function (err) {
+            aerospike.start((err) => {
 
                 expect(err).to.not.exist();
                 expect(aerospike.client).to.exist();
@@ -342,33 +359,34 @@ describe('Aerospike', function(){
             });
         });
 
-        it('reuses the client when a connection is already started', function (done) {
+        it('reuses the client when a connection is already started', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function (err) {
+            aerospike.start((err) => {
 
                 expect(err).to.not.exist();
-                var client = aerospike.client;
+                const client = aerospike.client;
 
-                aerospike.start(function (err) {
+                aerospike.start((err) => {
 
+                    expect(err).to.not.exist();
                     expect(client).to.equal(aerospike.client);
                     done();
                 });
             });
         });
 
-        it('returns an error when connection fails', function (done) {
+        it('returns an error when connection fails', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3005
@@ -378,9 +396,9 @@ describe('Aerospike', function(){
                 }
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function (err) {
+            aerospike.start((err) => {
 
                 expect(err).to.exist();
                 expect(err).to.be.instanceOf(Error);
@@ -391,19 +409,19 @@ describe('Aerospike', function(){
 
     });
 
-    describe('#isReady', function () {
+    describe('#isReady', () => {
 
-        it ('returns true when when connected', function (done) {
- 
-            var options = {
+        it('returns true when when connected', (done) => {
+
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function (err) {
+            aerospike.start((err) => {
 
                 expect(err).to.not.exist();
                 expect(aerospike.isReady()).to.equal(true);
@@ -414,17 +432,17 @@ describe('Aerospike', function(){
             });
         });
 
-        it ('returns false when stopped', function (done) {
+        it('returns false when stopped', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function (err) {
+            aerospike.start((err) => {
 
                 expect(err).to.not.exist();
                 expect(aerospike.isReady()).to.equal(true);
@@ -441,17 +459,17 @@ describe('Aerospike', function(){
         // Hard to detect and update isReady status
         // Need to figure out a solution
         /*
-        it ('returns false when disconnected', function (done) {
+        it ('returns false when disconnected', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function (err) {
+            aerospike.start((err) => {
 
                 expect(err).to.not.exist();
                 expect(aerospike.client).to.exist();
@@ -467,55 +485,55 @@ describe('Aerospike', function(){
         });
         */
     });
-    describe('#validateSegmentName', function () {
+    describe('#validateSegmentName', () => {
 
-        it('returns an error when the name is empty', function (done) {
+        it('returns an error when the name is empty', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            var result = aerospike.validateSegmentName('');
+            const result = aerospike.validateSegmentName('');
 
             expect(result).to.be.instanceOf(Error);
             expect(result.message).to.equal('Empty string');
             done();
         });
 
-        it('returns an error when the name has a null character', function (done) {
+        it('returns an error when the name has a null character', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            var result = aerospike.validateSegmentName('\0test');
+            const result = aerospike.validateSegmentName('\0test');
 
             expect(result).to.be.instanceOf(Error);
             done();
         });
 
-        it('returns null when there aren\'t any errors', function (done) {
+        it('returns null when there aren\'t any errors', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            var result = aerospike.validateSegmentName('valid');
+            const result = aerospike.validateSegmentName('valid');
 
             expect(result).to.not.be.instanceOf(Error);
             expect(result).to.equal(null);
@@ -523,20 +541,20 @@ describe('Aerospike', function(){
         });
     });
 
-    describe('#get', function () {
+    describe('#get', () => {
 
-        it('passes an error to the callback when the connection is closed', function (done) {
+        it('passes an error to the callback when the connection is closed', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.get('test', function (err) {
+            aerospike.get('test', (err) => {
 
                 expect(err).to.exist();
                 expect(err).to.be.instanceOf(Error);
@@ -545,24 +563,24 @@ describe('Aerospike', function(){
             });
         });
 
-        it('passes an error to the callback when there is an error returned from getting an item', function (done) {
+        it('passes an error to the callback when there is an error returned from getting an item', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
             aerospike.client = {
                 get: function (item, callback) {
 
-                    callback({code: 'ERR'});
+                    callback({ code: 'ERR' });
                 }
             };
 
-            aerospike.get('test', function (err) {
+            aerospike.get('test', (err) => {
 
                 expect(err).to.exist();
                 expect(err).to.be.instanceOf(Error);
@@ -570,24 +588,24 @@ describe('Aerospike', function(){
             });
         });
 
-        it('passes an error to the callback when there is an error parsing the result', function (done) {
+        it('passes an error to the callback when there is an error parsing the result', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
             aerospike.client = {
                 get: function (item, callback) {
 
-                    callback({code: 0}, 'test');
+                    callback(null, 'test');
                 }
             };
 
-            aerospike.get('test', function (err) {
+            aerospike.get('test', (err) => {
 
                 expect(err).to.exist();
                 expect(err.message).to.equal('Bad envelop content');
@@ -595,24 +613,24 @@ describe('Aerospike', function(){
             });
         });
 
-        it('passes an error to the callback when there is an error with the envelope structure (stored)', function (done) {
+        it('passes an error to the callback when there is an error with the envelope structure (stored)', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
             aerospike.client = {
                 get: function (item, callback) {
 
-                    callback({code: 0}, '{ "item": "false" }');
+                    callback(null, '{ "item": "false" }');
                 }
             };
 
-            aerospike.get('test', function (err) {
+            aerospike.get('test', (err) => {
 
                 expect(err).to.exist();
                 expect(err.message).to.equal('Bad envelop content');
@@ -620,24 +638,24 @@ describe('Aerospike', function(){
             });
         });
 
-        it('passes an error to the callback when there is an error with the envelope structure (item)', function (done) {
+        it('passes an error to the callback when there is an error with the envelope structure (item)', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
             aerospike.client = {
                 get: function (item, callback) {
 
-                    callback({code: 0}, '{ "stored": "123" }');
+                    callback(null, '{ "stored": "123" }');
                 }
             };
 
-            aerospike.get('test', function (err) {
+            aerospike.get('test', (err) => {
 
                 expect(err).to.exist();
                 expect(err.message).to.equal('Bad envelop content');
@@ -645,27 +663,27 @@ describe('Aerospike', function(){
             });
         });
 
-        it('is able to retrieve an object thats stored when connection is started', function (done) {
+        it('is able to retrieve an object thats stored when connection is started', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
-            var key = {
+            const key = {
                 id: 'test',
                 segment: 'test'
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function () {
+            aerospike.start(() => {
 
-                aerospike.set(key, 'myvalue', 200, function (err) {
+                aerospike.set(key, 'myvalue', 200, (err) => {
 
                     expect(err).to.not.exist();
-                    aerospike.get(key, function (err, result) {
+                    aerospike.get(key, (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result.item).to.equal('myvalue');
@@ -675,9 +693,9 @@ describe('Aerospike', function(){
             });
         });
 
-        it('returns null when unable to find the item', function (done) {
+        it('returns null when unable to find the item', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
@@ -685,15 +703,16 @@ describe('Aerospike', function(){
                 partition: 'test',
                 segment: 'test'
             };
-            var key = {
-                id: 'notfound',
+            const key = {
+                id: 'notfound'
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function () {
+            aerospike.start(() => {
 
-                aerospike.get(key, function (err, result) {
+                aerospike.get(key, (err, result) => {
+
                     expect(err).to.not.exist();
                     expect(result).to.not.exist();
                     done();
@@ -702,20 +721,20 @@ describe('Aerospike', function(){
         });
     });
 
-    describe('#set', function () {
+    describe('#set', () => {
 
-        it('passes an error to the callback when the connection is closed', function (done) {
+        it('passes an error to the callback when the connection is closed', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.set('test1', 'test1', 3600, function (err) {
+            aerospike.set('test1', 'test1', 3600, (err) => {
 
                 expect(err).to.exist();
                 expect(err).to.be.instanceOf(Error);
@@ -724,24 +743,24 @@ describe('Aerospike', function(){
             });
         });
 
-        it('passes an error to the callback when there is an error returned from setting an item', function (done) {
+        it('passes an error to the callback when there is an error returned from setting an item', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
             aerospike.client = {
-                put: function (key, item, meta, callback) {
+                put: function (key, item, meta, policy, callback) {
 
-                    callback({code: 'err'});
+                    callback(new Error('error'));
                 }
             };
 
-            aerospike.set('test', 'test', 3600, function (err) {
+            aerospike.set('test', 'test', 3600, (err) => {
 
                 expect(err).to.exist();
                 expect(err).to.be.instanceOf(Error);
@@ -750,20 +769,20 @@ describe('Aerospike', function(){
         });
     });
 
-    describe('#drop', function () {
+    describe('#drop', () => {
 
-        it('passes an error to the callback when the connection is closed', function (done) {
+        it('passes an error to the callback when the connection is closed', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.drop('test2', function (err) {
+            aerospike.drop('test2', (err) => {
 
                 expect(err).to.exist();
                 expect(err).to.be.instanceOf(Error);
@@ -772,24 +791,24 @@ describe('Aerospike', function(){
             });
         });
 
-        it('passes an error to the callback when there is an error returned from dropping an item', function (done) {
+        it('passes an error to the callback when there is an error returned from dropping an item', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
             aerospike.client = {
                 remove: function (key, callback) {
 
-                    callback({code: 'err'}, null);
+                    callback({ code: 'err' }, null);
                 }
             };
 
-            aerospike.drop('test', function (err) {
+            aerospike.drop('test', (err) => {
 
                 expect(err).to.exist();
                 expect(err).to.be.instanceOf(Error);
@@ -797,24 +816,24 @@ describe('Aerospike', function(){
             });
         });
 
-        it('deletes the item from aerospike', function (done) {
+        it('deletes the item from aerospike', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
             aerospike.client = {
                 remove: function (key, callback) {
 
-                    callback({code: 0}, null);
+                    callback(null, null);
                 }
             };
 
-            aerospike.drop('test', function (err) {
+            aerospike.drop('test', (err) => {
 
                 expect(err).to.not.exist();
                 done();
@@ -822,20 +841,20 @@ describe('Aerospike', function(){
         });
     });
 
-    describe('#stop', function () {
+    describe('#stop', () => {
 
-        it('sets the client to null', function (done) {
+        it('sets the client to null', (done) => {
 
-            var options = {
+            const options = {
                 hosts: [{
                     addr: '127.0.0.1',
                     port: 3000
                 }]
             };
 
-            var aerospike = new Aerospike(options);
+            const aerospike = new Aerospike(options);
 
-            aerospike.start(function () {
+            aerospike.start(() => {
 
                 expect(aerospike.client).to.exist();
                 aerospike.stop();

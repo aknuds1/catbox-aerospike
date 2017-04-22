@@ -1,26 +1,17 @@
 # catbox-aerospike
-Caching Adapter for [Aerospike](http://www.aerospike.com) **v 3.6.x** for [catbox](https://github.com/hapijs/catbox) v **7.x.x**
-
-**Version: 1.0**
+Caching Adapter for [Aerospike](http://www.aerospike.com) for [catbox](https://github.com/hapijs/catbox)
 
 ## Versions
-* `v 1.x.x`: `node v 4.x.x` and `catbox v >= 6.x`
-* `v 0.1.x`: `node v 0.10.x` and `catbox v 6.x`
-
-`catbox v 7.x.x` has breaking changes and is compatible with `node.js v 4.x.x`
+* `v 2.x.x`: `node v 4.x.x` and `aerospike client v 2.x.x`
+* `v 1.x.x`: `node v 4.x.x` and `aerospike client v 1.x.x`
+* `v 0.x.x`: `node v 0.10.x` and `aerospike client v 1.x.x`
 
 [![npm version](https://badge.fury.io/js/catbox-aerospike.png)](http://npmjs.org/package/catbox-aerospike)
 [![Build Status](https://travis-ci.org/ooogway/catbox-aerospike.svg?branch=master)](https://travis-ci.org/ooogway/catbox-aerospike)
 
 ## Installation
-**Node v 4**
 ```sh
 $ npm install catbox-aerospike --save
-```
-
-**Node v 0.10.x**
-```sh
-$ npm install catbox-aerospike@0.1.x --save
 ```
 
 ## Options
@@ -36,9 +27,9 @@ $ npm install catbox-aerospike@0.1.x --save
 ## Initialization
 
 ```javascript
-var Hapi = require('hapi');
+const Hapi = require('hapi');
 
-var server = new Hapi.Server({
+const server = new Hapi.Server({
     cache: [
         {
             name: 'aeroCache',
@@ -59,10 +50,10 @@ var server = new Hapi.Server({
 {
     "server": {
         "app": {
-
+            ...
         },
         "connections": {
-
+            ...
         },
         "cache": {
             "name": "aeroCache"
@@ -77,10 +68,10 @@ var server = new Hapi.Server({
         }
     },
     "connections": {
-
+        ...
     },
     "plugins": {
-
+        ...
     }
 }
 ```
@@ -88,7 +79,7 @@ var server = new Hapi.Server({
 ## Usage
 
 ```javascript
-var add = function (a, b, next) {
+const add = function (a, b, next) {
 
     return next(null, Number(a) + Number(b));
 };
