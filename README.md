@@ -7,7 +7,7 @@ Caching Adapter for [Aerospike](http://www.aerospike.com) for [catbox](https://g
 * `v 0.x.x`: `node v 0.10.x` and `aerospike client v 1.x.x`
 
 [![npm version](https://badge.fury.io/js/catbox-aerospike.png)](http://npmjs.org/package/catbox-aerospike)
-[![Build Status](https://travis-ci.org/ooogway/catbox-aerospike.svg?branch=master)](https://travis-ci.org/ooogway/catbox-aerospike)
+[![Build Status](https://travis-ci.org/augnin/catbox-aerospike.svg?branch=master)](https://travis-ci.org/augnin/catbox-aerospike)
 
 ## Installation
 ```sh
